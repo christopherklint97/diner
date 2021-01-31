@@ -16,13 +16,18 @@
     "postcss": "^8.1.10",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "tailwindcss": "^2.0.2"
+    "react-hook-form": "^6.14.2",
+    "react-select": "^4.0.2",
+    "tailwindcss": "^2.0.2",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@types/lodash.sortby": "^4.7.6",
     "@types/node": "^12.12.21",
     "@types/react": "^16.9.16",
     "@types/react-dom": "^16.9.4",
+    "@types/react-select": "^4.0.8",
+    "@types/uuid": "^8.3.0",
     "typescript": "4.0"
   }
 }
