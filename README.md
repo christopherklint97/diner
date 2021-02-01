@@ -1,6 +1,6 @@
 # Diner MVP
 
-Diner is a minimum viable product that displays different menus and the ability to sort them based on 3 different filters:
+[Diner](https://diner-eight.vercel.app/) is a minimum viable product that displays different menus and the ability to sort them based on 3 different filters:
 
 1. Sort by name
 2. Sort by shop ID
