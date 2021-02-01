@@ -39,7 +39,7 @@ function Home({
   const activeFilter = useSelector((state: RootState) => state.active.value);
 
   // Get the weekday for today
-  const today = new Date().toLocaleDateString(undefined, { weekday: "long" });
+  const today = new Date().toLocaleDateString("en-GB", { weekday: "long" });
 
   // Local state management for menu items
   const [menuItems, setMenuItems] = useState<JSX.Element[]>([]);
