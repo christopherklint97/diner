@@ -1,10 +1,7 @@
-import { Menu } from "../pages/index";
+import { MenuCardProps } from "../types/components";
 import CategoryCard from "./CategoryCard";
 
-interface MenuCardProps {
-  menu: Menu;
-}
-
+// Display the menu card with category and product info
 export default function MenuCard({ menu }: MenuCardProps) {
   const days = menu.activeDays.map((day) => (
     <p className="ml-2 font-normal" key={day}>
@@ -25,7 +22,7 @@ export default function MenuCard({ menu }: MenuCardProps) {
   ));
 
   return (
-    <div className="flex flex-col p-6 m-8 bg-white border-2 border-red-400 border-opacity-50 rounded-lg lg:w-1/3">
+    <div className="flex flex-col p-6 m-8 bg-white border-2 border-red-400 border-opacity-50 rounded-lg shadow-lg lg:w-1/3">
       <h1 className="text-3xl font-light">{menu.name}</h1>
       <div className="flex flex-row flex-wrap justify-center mx-auto font-medium">
         Active: {days}

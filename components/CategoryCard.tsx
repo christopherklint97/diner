@@ -1,6 +1,7 @@
-import { Category } from "../pages";
+import { Category } from "../types/components";
 import ProductCard from "./ProductCard";
 
+// Display the categories of the menu
 export default function CategoryCard({ name, products }: Category) {
   const productItems = products.map((product) => (
     <ProductCard key={product.name} name={product.name} price={product.price} />

@@ -1,36 +1,19 @@
 import axios from "axios";
-import { InferGetStaticPropsType } from "next";
+import { InferGetServerSidePropsType } from "next";
 import Head from "next/head";
 import { BASE_URL } from "../config";
 import sortBy from "lodash.sortby";
-import { useState } from "react";
 import MenuCard from "../components/MenuCard";
 import FilterForm from "../components/FilterForm";
-
-export interface Menu {
-  name: string;
-  activeDays: string[];
-  shopIds: string[];
-  categories: Category[];
-}
-
-export interface Category {
-  name: string;
-  products: Product[];
-}
-
-export interface Product {
-  name: string;
-  price: number;
-}
-
-export interface ShopIdFilter {
-  value: string;
-  label: string;
-}
+import { shallowEqual, useSelector } from "react-redux";
+import { RootState } from "../redux/reducers/rootReducer";
+import { Menu } from "../types/components";
+import Header from "../components/Header";
+import { useState, useEffect } from "react";
+import Image from "next/image";
 
 // This function gets called at build time on server-side.
-export async function getStaticProps() {
+export async function getServerSideProps() {
   // Call the API endpoint to get menus.
   const res = await axios.get(`${BASE_URL}/api/menus`);
   const menus: Menu[] = res.data.data;
@@ -43,54 +26,61 @@ export async function getStaticProps() {
   };
 }
 
-function Home({ menus }: InferGetStaticPropsType<typeof getStaticProps>) {
-  const [nameFilter, setNameFilter] = useState("");
-  const [shopIdFilter, setShopIdFilter] = useState<ShopIdFilter[] | undefined>(
-    undefined
+// Homepage displaying menu cards and filters
+function Home({
+  menus,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  // Select the following filter states from redux
+  const nameFilter = useSelector((state: RootState) => state.name.value);
+  const shopIdFilter = useSelector(
+    (state: RootState) => state.shopId.value,
+    shallowEqual
   );
-  const [activeFilter, setActiveFilter] = useState(false);
-  const today = new Date().toLocaleDateString(undefined, { weekday: "long" });
-  console.log(shopIdFilter);
+  const activeFilter = useSelector((state: RootState) => state.active.value);
 
-  const menuItems = sortBy(menus, "name")
-    // Filtering of the name
-    .filter((menu) =>
-      menu.name.toLowerCase().includes(nameFilter.toLowerCase())
-    )
-    // Filtering of the shopIds
-    .filter((filteredMenu) => {
-      if (shopIdFilter) {
+  // Get the weekday for today
+  const today = new Date().toLocaleDateString(undefined, { weekday: "long" });
+
+  // Local state management for menu items
+  const [menuItems, setMenuItems] = useState<JSX.Element[]>([]);
+
+  useEffect(() => {
+    const items = sortBy(menus, "name")
+      // Filtering of the name
+      .filter((menu) =>
+        menu.name.toLowerCase().includes(nameFilter.toLowerCase())
+      )
+      // Filtering of the shopIds
+      .filter((filteredMenu) => {
         if (
-          filteredMenu.shopIds.some((id) =>
-            id.toLowerCase().includes(shopIdFilter[0].value)
-          ) ||
-          shopIdFilter[0].value === ""
+          filteredMenu.shopIds.find((id) => shopIdFilter.includes(id)) ||
+          shopIdFilter.length === 0
         ) {
           return true;
         } else {
           return false;
         }
-      } else {
-        return false;
-      }
-    })
-    // Filtering if the active day is today, but only when activeFilter
-    // is true
-    .filter((filteredMenu2) => {
-      if (!activeFilter) {
-        return true;
-      } else if (
-        filteredMenu2.activeDays.some((day) =>
-          day.toLowerCase().includes(today.toLowerCase())
-        ) &&
-        activeFilter
-      ) {
-        return true;
-      } else {
-        return false;
-      }
-    })
-    .map((menu) => <MenuCard key={menu.name} menu={menu} />);
+      })
+      // Filtering if the active day is today, but only when activeFilter
+      // is true
+      .filter((filteredMenu2) => {
+        if (!activeFilter) {
+          return true;
+        } else if (
+          filteredMenu2.activeDays.some((day) =>
+            day.toLowerCase().includes(today.toLowerCase())
+          ) &&
+          activeFilter
+        ) {
+          return true;
+        } else {
+          return false;
+        }
+      })
+      .map((menu) => <MenuCard key={menu.name} menu={menu} />);
+
+    setMenuItems(items);
+  }, [nameFilter, shopIdFilter, activeFilter]);
 
   return (
     <div className="flex flex-col min-h-screen pb-20 text-center bg-gray-100">
@@ -98,33 +88,19 @@ function Home({ menus }: InferGetStaticPropsType<typeof getStaticProps>) {
         <title>Diner</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <header className="h-10 pt-2 text-white bg-red-400 ">
-        <nav className="flex flex-row justify-center w-1/2 mx-auto">
-          <a className="mx-4" href="#">
-            Home
-          </a>
-          <a className="mx-4" href="#">
-            Github
-          </a>
-        </nav>
-      </header>
-
+      <Header />
+      <div className="flex flex-row justify-center my-8 text-4xl font-light">
+        <h1 className="pt-1">Diner</h1>
+        <Image width="50px" height="50px" src="/yum.png" alt="" />
+      </div>
       <main>
-        <div>
-          <FilterForm
-            setNameFilter={setNameFilter}
-            setShopIdFilter={setShopIdFilter}
-            setActiveFilter={setActiveFilter}
-          />
+        <div className="flex flex-col flex-wrap w-3/4 mx-auto sm:w-1/2 lg:w-1/3 ">
+          <FilterForm />
         </div>
         <div className="flex flex-col flex-wrap w-3/4 mx-auto justify-evenly lg:flex-row">
           {menuItems}
         </div>
       </main>
-
-      {/* <footer className="h-1/6">
-        <p>Footer</p>
-      </footer> */}
     </div>
   );
 }
